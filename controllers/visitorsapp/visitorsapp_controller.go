@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	examplev1 "github.com/vysr2939/visitors-app/api/v1/"
+	examplev1 "github.com/vysr2939/visitingapp/api/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -132,7 +132,7 @@ func (r *ReconcileVisitorsApp) Reconcile(request reconcile.Request) (reconcile.R
 	if !mysqlRunning {
 		// If MySQL isn't running yet, requeue the reconcile
 		// to run again after a delay
-		delay := time.Second*time.Duration(5)
+		delay := time.Second * time.Duration(5)
 
 		log.Info(fmt.Sprintf("MySQL isn't running, waiting for %s", delay))
 		return reconcile.Result{RequeueAfter: delay}, nil
@@ -166,8 +166,7 @@ func (r *ReconcileVisitorsApp) Reconcile(request reconcile.Request) (reconcile.R
 		return *result, err
 	}
 
-	result, err = r.ensureService(request, v, r.frontendService(v),
-	)
+	result, err = r.ensureService(request, v, r.frontendService(v))
 	if result != nil {
 		return *result, err
 	}

@@ -3,7 +3,7 @@ package visitorsapp
 import (
 	"context"
 
-	examplev1 "github.com/vysr2939/visitors-app/api/v1/"
+	examplev1 "github.com/vysr2939/visitingapp/api/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -84,8 +84,8 @@ func (r *ReconcileVisitorsApp) ensureSecret(request reconcile.Request,
 ) (*reconcile.Result, error) {
 	found := &corev1.Secret{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{
-		Name:		s.Name,
-		Namespace:	instance.Namespace,
+		Name:      s.Name,
+		Namespace: instance.Namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 		// Create the secret

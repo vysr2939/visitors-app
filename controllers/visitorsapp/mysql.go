@@ -3,7 +3,7 @@ package visitorsapp
 import (
 	"context"
 
-	examplev1 "github.com/vysr2939/visitors-app/api/v1/"
+	examplev1 "github.com/vysr2939/visitingapp/api/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -27,8 +27,8 @@ func mysqlAuthName() string {
 func (r *ReconcileVisitorsApp) mysqlAuthSecret(v *examplev1.VisitorsApp) *corev1.Secret {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		mysqlAuthName(),
-			Namespace:	v.Namespace,
+			Name:      mysqlAuthName(),
+			Namespace: v.Namespace,
 		},
 		Type: "Opaque",
 		StringData: map[string]string{
@@ -47,21 +47,21 @@ func (r *ReconcileVisitorsApp) mysqlDeployment(v *examplev1.VisitorsApp) *appsv1
 	userSecret := &corev1.EnvVarSource{
 		SecretKeyRef: &corev1.SecretKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{Name: mysqlAuthName()},
-			Key: "username",
+			Key:                  "username",
 		},
 	}
 
 	passwordSecret := &corev1.EnvVarSource{
 		SecretKeyRef: &corev1.SecretKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{Name: mysqlAuthName()},
-			Key: "password",
+			Key:                  "password",
 		},
 	}
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		mysqlDeploymentName(),
-			Namespace: 	v.Namespace,
+			Name:      mysqlDeploymentName(),
+			Namespace: v.Namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &size,
@@ -74,27 +74,27 @@ func (r *ReconcileVisitorsApp) mysqlDeployment(v *examplev1.VisitorsApp) *appsv1
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image:	"mysql:5.7",
-						Name:	"visitors-mysql",
-						Ports:	[]corev1.ContainerPort{{
-							ContainerPort: 	3306,
-							Name:			"mysql",
+						Image: "mysql:5.7",
+						Name:  "visitors-mysql",
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: 3306,
+							Name:          "mysql",
 						}},
-						Env:	[]corev1.EnvVar{
+						Env: []corev1.EnvVar{
 							{
-								Name:	"MYSQL_ROOT_PASSWORD",
-								Value: 	"password",
+								Name:  "MYSQL_ROOT_PASSWORD",
+								Value: "password",
 							},
 							{
-								Name:	"MYSQL_DATABASE",
-								Value:	"visitors",
+								Name:  "MYSQL_DATABASE",
+								Value: "visitors",
 							},
 							{
-								Name:	"MYSQL_USER",
+								Name:      "MYSQL_USER",
 								ValueFrom: userSecret,
 							},
 							{
-								Name:	"MYSQL_PASSWORD",
+								Name:      "MYSQL_PASSWORD",
 								ValueFrom: passwordSecret,
 							},
 						},
@@ -113,15 +113,15 @@ func (r *ReconcileVisitorsApp) mysqlService(v *examplev1.VisitorsApp) *corev1.Se
 
 	s := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		mysqlServiceName(),
-			Namespace: 	v.Namespace,
+			Name:      mysqlServiceName(),
+			Namespace: v.Namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Selector: 	labels,
-			Ports: 		[]corev1.ServicePort{{
-				Port: 		3306,
+			Selector: labels,
+			Ports: []corev1.ServicePort{{
+				Port: 3306,
 			}},
-			ClusterIP:	"None",
+			ClusterIP: "None",
 		},
 	}
 
@@ -130,13 +130,13 @@ func (r *ReconcileVisitorsApp) mysqlService(v *examplev1.VisitorsApp) *corev1.Se
 }
 
 // Returns whether or not the MySQL deployment is running
-func (r *ReconcileVisitorsApp) isMysqlUp(v *examplev1.VisitorsApp) (bool) {
+func (r *ReconcileVisitorsApp) isMysqlUp(v *examplev1.VisitorsApp) bool {
 	deployment := &appsv1.Deployment{}
 
 	err := r.client.Get(context.TODO(), types.NamespacedName{
-		Name: mysqlDeploymentName(),
+		Name:      mysqlDeploymentName(),
 		Namespace: v.Namespace,
-		}, deployment)
+	}, deployment)
 
 	if err != nil {
 		log.Error(err, "Deployment mysql not found")

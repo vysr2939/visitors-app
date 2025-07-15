@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	examplev1 "github.com/vysr2939/visitors-app/api/v1/"
+	examplev1 "github.com/vysr2939/visitingapp/api/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -34,21 +34,21 @@ func (r *ReconcileVisitorsApp) backendDeployment(v *examplev1.VisitorsApp) *apps
 	userSecret := &corev1.EnvVarSource{
 		SecretKeyRef: &corev1.SecretKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{Name: mysqlAuthName()},
-			Key: "username",
+			Key:                  "username",
 		},
 	}
 
 	passwordSecret := &corev1.EnvVarSource{
 		SecretKeyRef: &corev1.SecretKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{Name: mysqlAuthName()},
-			Key: "password",
+			Key:                  "password",
 		},
 	}
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		backendDeploymentName(v),
-			Namespace: 	v.Namespace,
+			Name:      backendDeploymentName(v),
+			Namespace: v.Namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &size,
@@ -61,28 +61,28 @@ func (r *ReconcileVisitorsApp) backendDeployment(v *examplev1.VisitorsApp) *apps
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image:	backendImage,
+						Image:           backendImage,
 						ImagePullPolicy: corev1.PullAlways,
-						Name:	"visitors-service",
-						Ports:	[]corev1.ContainerPort{{
-							ContainerPort: 	backendPort,
-							Name:			"visitors",
+						Name:            "visitors-service",
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: backendPort,
+							Name:          "visitors",
 						}},
-						Env:	[]corev1.EnvVar{
+						Env: []corev1.EnvVar{
 							{
-								Name:	"MYSQL_DATABASE",
-								Value:	"visitors",
+								Name:  "MYSQL_DATABASE",
+								Value: "visitors",
 							},
 							{
-								Name:	"MYSQL_SERVICE_HOST",
-								Value:	mysqlServiceName(),
+								Name:  "MYSQL_SERVICE_HOST",
+								Value: mysqlServiceName(),
 							},
 							{
-								Name:	"MYSQL_USERNAME",
+								Name:      "MYSQL_USERNAME",
 								ValueFrom: userSecret,
 							},
 							{
-								Name:	"MYSQL_PASSWORD",
+								Name:      "MYSQL_PASSWORD",
 								ValueFrom: passwordSecret,
 							},
 						},
@@ -101,16 +101,16 @@ func (r *ReconcileVisitorsApp) backendService(v *examplev1.VisitorsApp) *corev1.
 
 	s := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		backendServiceName(v),
-			Namespace: 	v.Namespace,
+			Name:      backendServiceName(v),
+			Namespace: v.Namespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: labels,
 			Ports: []corev1.ServicePort{{
-				Protocol: corev1.ProtocolTCP,
-				Port: backendPort,
+				Protocol:   corev1.ProtocolTCP,
+				Port:       backendPort,
 				TargetPort: intstr.FromInt(backendPort),
-				NodePort: 30685,
+				NodePort:   30685,
 			}},
 			Type: corev1.ServiceTypeNodePort,
 		},
@@ -120,7 +120,7 @@ func (r *ReconcileVisitorsApp) backendService(v *examplev1.VisitorsApp) *corev1.
 	return s
 }
 
-func (r *ReconcileVisitorsApp) updateBackendStatus(v *examplev1.VisitorsApp) (error) {
+func (r *ReconcileVisitorsApp) updateBackendStatus(v *examplev1.VisitorsApp) error {
 	v.Status.BackendImage = backendImage
 	err := r.client.Status().Update(context.TODO(), v)
 	return err
@@ -134,7 +134,7 @@ func (r *ReconcileVisitorsApp) handleBackendChanges(v *examplev1.VisitorsApp) (*
 	}, found)
 	if err != nil {
 		// The deployment may not have been created yet, so requeue
-		return &reconcile.Result{RequeueAfter:5 * time.Second}, err
+		return &reconcile.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	size := v.Spec.Size
