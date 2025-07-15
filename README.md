@@ -1,38 +1,41 @@
 # Visitors App Operator
 
-This repository contains a Kubernetes operator built with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) / [Operator SDK](https://github.com/operator-framework/operator-sdk). It manages a custom resource named **VisitorsApp** which deploys a simple web application composed of MySQL, a backend service, and a React based frontend.
+This repository contains a sample Kubernetes operator called **Visitors App**. It was generated using [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and the [Operator SDK](https://github.com/operator-framework/operator-sdk).
+The operator manages a small web application composed of a MySQL database, a Go backend service and a React frontend.
 
-## Project structure
+A custom resource named `VisitorsApp` controls the number of backend replicas (`size`) and the title displayed in the UI (`title`). When a `VisitorsApp` object is created, the operator ensures all three components are deployed and kept up to date.
+
+## Repository layout
 
 ```
 .
 ├── api/              # Custom resource API definitions
 ├── controllers/      # Reconciler logic and resource helpers
 │   └── visitorsapp/  # MySQL, backend and frontend implementations
-├── config/           # Kustomize overlays, RBAC, manifests
-├── main.go           # Entry point for the manager
-└── Makefile          # Build and deployment helpers
+├── config/           # Kustomize overlays, RBAC rules and manifests
+├── main.go           # Entry point for the controller manager
+└── Makefile          # Build and deployment commands
 ```
 
-- `api/v1/visitorsapp_types.go` defines the CRD schema including `size` and `title` fields in the spec and status information for the deployed images.
+- `api/v1/visitorsapp_types.go` defines the CRD schema and status fields for the backend and frontend images.
 - `controllers/visitorsapp/` contains the reconciler and helper functions that create Deployments, Services and Secrets for each component.
-- `config/` holds Kustomize configuration used for installing and running the operator in a cluster.
+- `config/` holds the Kustomize configuration used to install and run the operator.
 
 ## Building and running
 
-The operator is managed through the provided **Makefile**. Typical targets include:
+Use the provided `Makefile` to interact with the project:
 
 ```bash
-make install   # Install CRDs into the configured cluster
-make run       # Run the controller locally
-make deploy    # Build and deploy the controller to the cluster
+make install   # Install CRDs into your cluster
+make run       # Run the controller locally against the cluster
+make deploy    # Build the manager container and deploy it
 ```
 
-See the `Makefile` for the full list of available commands.
+See `make help` for the full list of targets.
 
-## Custom resource example
+## Example custom resource
 
-A VisitorsApp instance declares the number of backend replicas and an optional title for the web UI header:
+Below is a minimal `VisitorsApp` manifest that deploys one backend replica and sets the page title:
 
 ```yaml
 apiVersion: example.com.example.com/v1
@@ -44,11 +47,11 @@ spec:
   title: "Welcome!"
 ```
 
-Apply the manifest after the operator is running to deploy the application components.
+Apply this manifest once the operator is running to create the application components.
 
 ## Learn more
 
-- Inspect `controllers/` to see how MySQL, backend and frontend resources are built and kept in sync.
+- Inspect the code under `controllers/` to see how resources are reconciled.
 - Explore `config/` to understand how Kustomize assembles the deployment manifests.
-- Run `make help` to view all make targets and additional details.
+- Run `make help` to see all available make commands.
 
