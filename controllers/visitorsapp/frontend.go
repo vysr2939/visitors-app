@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	examplev1 "github.com/vysr2939/visitors-app/api/v1/"
+	examplev1 "github.com/vysr2939/visitingapp/api/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -35,15 +35,15 @@ func (r *ReconcileVisitorsApp) frontendDeployment(v *examplev1.VisitorsApp) *app
 	env := []corev1.EnvVar{}
 	if v.Spec.Title != "" {
 		env = append(env, corev1.EnvVar{
-			Name:	"REACT_APP_TITLE",
-			Value:	v.Spec.Title,
+			Name:  "REACT_APP_TITLE",
+			Value: v.Spec.Title,
 		})
 	}
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		frontendDeploymentName(v),
-			Namespace: 	v.Namespace,
+			Name:      frontendDeploymentName(v),
+			Namespace: v.Namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &size,
@@ -56,13 +56,13 @@ func (r *ReconcileVisitorsApp) frontendDeployment(v *examplev1.VisitorsApp) *app
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image:	frontendImage,
-						Name:	"visitors-webui",
-						Ports:	[]corev1.ContainerPort{{
-							ContainerPort: 	frontendPort,
-							Name:			"visitors",
+						Image: frontendImage,
+						Name:  "visitors-webui",
+						Ports: []corev1.ContainerPort{{
+							ContainerPort: frontendPort,
+							Name:          "visitors",
 						}},
-						Env:	env,
+						Env: env,
 					}},
 				},
 			},
@@ -78,16 +78,16 @@ func (r *ReconcileVisitorsApp) frontendService(v *examplev1.VisitorsApp) *corev1
 
 	s := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:		frontendServiceName(v),
-			Namespace: 	v.Namespace,
+			Name:      frontendServiceName(v),
+			Namespace: v.Namespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: labels,
 			Ports: []corev1.ServicePort{{
-				Protocol: corev1.ProtocolTCP,
-				Port: frontendPort,
+				Protocol:   corev1.ProtocolTCP,
+				Port:       frontendPort,
 				TargetPort: intstr.FromInt(frontendPort),
-				NodePort: frontendServicePort,
+				NodePort:   frontendServicePort,
 			}},
 			Type: corev1.ServiceTypeNodePort,
 		},
@@ -99,7 +99,7 @@ func (r *ReconcileVisitorsApp) frontendService(v *examplev1.VisitorsApp) *corev1
 	return s
 }
 
-func (r *ReconcileVisitorsApp) updateFrontendStatus(v *examplev1.VisitorsApp) (error) {
+func (r *ReconcileVisitorsApp) updateFrontendStatus(v *examplev1.VisitorsApp) error {
 	v.Status.FrontendImage = frontendImage
 	err := r.client.Status().Update(context.TODO(), v)
 	return err
@@ -113,7 +113,7 @@ func (r *ReconcileVisitorsApp) handleFrontendChanges(v *examplev1.VisitorsApp) (
 	}, found)
 	if err != nil {
 		// The deployment may not have been created yet, so requeue
-		return &reconcile.Result{RequeueAfter:5 * time.Second}, err
+		return &reconcile.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	title := v.Spec.Title

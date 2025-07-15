@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/jdob/visitors-operator/pkg/controller/visitorsapp"
+	"github.com/vysr2939/visitingapp/controllers/visitorsapp"
 )
 
 func init() {
